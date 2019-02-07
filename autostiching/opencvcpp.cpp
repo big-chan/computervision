@@ -282,20 +282,27 @@ int main()
 	//사진 불러오기&체크
 	vector<Mat> panorama;
 	vector<feat> pf;
-	panorama.push_back(imread("i1.jpg", IMREAD_COLOR));
-	panorama.push_back(imread("i3.jpg", IMREAD_COLOR));
-	panorama.push_back(imread("i4.jpg", IMREAD_COLOR));
-	panorama.push_back(imread("i5.jpg", IMREAD_COLOR));
-	panorama.push_back(imread("i6.jpg", IMREAD_COLOR));
-	panorama.push_back(imread("i7.jpg", IMREAD_COLOR));
-	panorama.push_back(imread("i8.jpg", IMREAD_COLOR));
+	String folderpath = "C:/panaroma";
+	vector<String> filenames;
+	glob(folderpath, filenames);
+
+	cout << "\n------- file load ---------\n" << endl;
+
+	for (size_t i = 0; i < filenames.size(); i++)
+	{
+	
+		panorama.push_back(imread(filenames[i], IMREAD_COLOR));
+		cout << filenames[i] << "   load" << endl;
+		
+	}
+
 	feat what;
 	
-	Mat panoramaimg = imread("i2.jpg", IMREAD_COLOR);
+	Mat panoramaimg = imread(filenames[1], IMREAD_COLOR);
 
 	/**/
 	std::cout << "################ matches ################" << std::endl;
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < panorama.size(); i++) {
 		what = findf(panorama[i]);
 		pf.push_back(what);
 		cout<<"feat===" << i << endl;
@@ -305,7 +312,7 @@ int main()
 	double maxp=0;
 	int maxi;
 	char buf[256];
-	for (int i = 0; i < 7;i++) {
+	for (int i = 0; i < panorama.size();i++) {
 		what = findf(panoramaimg);
 		for (int j = 0; j < pf.size(); j++) {
 			per=find_matches(what,pf[j]);
@@ -325,6 +332,7 @@ int main()
 		pf.erase(pf.begin()+maxi);
 		maxp = 0;
 	}
+	namedWindow("result", CV_WINDOW_FREERATIO);
 	imshow("result", panoramaimg);
 
 	//up
