@@ -212,14 +212,52 @@ void mnisttrain() {
 
 	cout << "Accuracy        : " << accuracy << "%" << endl;
 }
+void test() {
+	vector<Mat> trainCells;
+	vector<Mat> testCells;
+	vector<int> trainLabels;
+	vector<int> testLabels;
+	loadTrainTestLabel(pathName, trainCells, testCells, trainLabels, testLabels);
+
+	vector<Mat> deskewedTrainCells;
+	vector<Mat> deskewedTestCells;
+
+
+	CreateDeskewedTrainTest(deskewedTrainCells, deskewedTestCells, trainCells, testCells);
+
+	std::vector<std::vector<float> > trainHOG;
+	std::vector<std::vector<float> > testHOG;
+	CreateTrainTestHOG(trainHOG, testHOG, deskewedTrainCells, deskewedTestCells);
+
+	int descriptor_size = trainHOG[0].size();
+	cout << "Descriptor Size : " << descriptor_size << endl;
+
+	Mat trainMat(trainHOG.size(), descriptor_size, CV_32FC1);
+	Mat testMat(testHOG.size(), descriptor_size, CV_32FC1);
+
+	ConvertVectortoMatrix(trainHOG, testHOG, trainMat, testMat);
+
+	Mat testResponse;
+	CvSVM svm;
+	svm.load("./mnist.xml");
+	svm.predict(testMat, testResponse);
+
+	float count = 0;
+	float accuracy = 0;
+	SVMevaluate(testResponse, count, accuracy, testLabels);
+
+	cout << "Accuracy        : " << accuracy << "%" << endl;
+}
 int main() {
 	String SVMfilename = "./mnist.xml";
 	FileStorage fs(SVMfilename, FileStorage::READ);
-	Ptr<CvSVM> svm;
+	SVM svm;
 	if (fs.isOpened()) {
-		svm->load("./mnist.xml");
+		cout << "a" << endl;
+		test();
 	}
 	else {
+		cout << "b" << endl;
 		mnisttrain();
 	}
 	return 0;
